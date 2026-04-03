@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import '../utils/formatadores.dart';
 
-// Títulos das seções (Entradas, Menus, etc)
+// -------------------------------
+// SECTION HEADER
+// -------------------------------
 class SectionHeader extends StatelessWidget {
   final String title;
   final Color color;
 
-  const SectionHeader({super.key, required this.title, required this.color});
+  const SectionHeader({
+    super.key,
+    required this.title,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +20,19 @@ class SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 10),
       child: Text(
         title,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
       ),
     );
   }
 }
 
-// Campo de entrada de texto customizado
+// -------------------------------
+// INPUT CUSTOM
+// -------------------------------
 class InputTrabalhista extends StatelessWidget {
   final String label;
   final TextEditingController controller;
@@ -37,6 +49,26 @@ class InputTrabalhista extends StatelessWidget {
     required this.onChanged,
   });
 
+  void _handleChange(String value) {
+    String novoTexto = value;
+
+    if (isMoney) {
+      novoTexto = formatarEntradaFinanceira(value);
+    } else if (decimalShift) {
+      novoTexto = formatarEntradaDecimal(value);
+    }
+
+    // evita loop infinito
+    if (controller.text != novoTexto) {
+      controller.value = TextEditingValue(
+        text: novoTexto,
+        selection: TextSelection.collapsed(offset: novoTexto.length),
+      );
+    }
+
+    onChanged(novoTexto);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -49,13 +81,15 @@ class InputTrabalhista extends StatelessWidget {
           prefixText: isMoney ? "R\$ " : null,
           border: const OutlineInputBorder(),
         ),
-        onChanged: onChanged,
+        onChanged: _handleChange,
       ),
     );
   }
 }
 
-// Menu Dropdown customizado
+// -------------------------------
+// DROPDOWN
+// -------------------------------
 class DropdownTrabalhista extends StatelessWidget {
   final String label;
   final List<String> items;
@@ -76,15 +110,22 @@ class DropdownTrabalhista extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: DropdownButtonFormField<String>(
         value: value,
-        items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+        items: items
+            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .toList(),
         onChanged: onChanged,
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
       ),
     );
   }
 }
 
-// Linha do Resumo Final
+// -------------------------------
+// RESUMO LINE
+// -------------------------------
 class ResumoLine extends StatelessWidget {
   final String label;
   final double valor;
@@ -124,6 +165,28 @@ class ResumoLine extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// -------------------------------
+// BOX DE RESUMO (REUTILIZÁVEL)
+// -------------------------------
+class ResumoBox extends StatelessWidget {
+  final List<Widget> children;
+
+  const ResumoBox({super.key, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.blueGrey.shade200),
+      ),
+      child: Column(children: children),
     );
   }
 }
